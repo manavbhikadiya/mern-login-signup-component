@@ -1,0 +1,37 @@
+Resources:
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      TableName: 'users'
+      GlobalSecondaryIndexes:
+        - IndexName: idIndex
+          KeySchema:
+            - AttributeName: id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+        - IndexName: emailIndex
+          KeySchema:
+            - AttributeName: email
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  MySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: MySecret
+      Description: My secret
+      SecretString: '{"jwtsecret": "B00945545"}'
+      Tags:
+        - Key: Environment
+          Value: Production

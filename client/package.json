@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "aws-sdk": "^2.1488.0",
     "axios": "^0.21.2",
     "bootstrap": "^4.4.1",
     "react": "^16.13.0",
@@ -17,13 +18,12 @@
     "redux-thunk": "^2.3.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://localhost:5000",
-  "homepage": "https://demos.shawndsilva.com/sessions-auth-app",
+  "homepage": ".",
   "eslintConfig": {
     "extends": "react-app"
   },

@@ -10,6 +10,8 @@ import {
   AUTH_FAIL,
   LOGOUT_SUCCESS,
   IS_LOADING,
+  UPDATE_FAIL,
+  UPDATE_SUCCESS,
 } from "./types";
 
 //Uncomment below for local testing
@@ -20,94 +22,138 @@ import {
 
 //Check if user is already logged in
 export const isAuth = () => (dispatch) => {
+  const AccessToken = localStorage.getItem("AccessToken");
 
-    axios
-    .get("/api/users/authchecker",{withCredentials:true})
+  axios
+    .get(`${process.env.REACT_APP_BACKEND_API}/api/users/authchecker`, {
+      withCredentials: true,
+      headers: {
+        Authorization: `${AccessToken}`,
+      },
+    })
     .then((res) =>
       dispatch({
         type: AUTH_SUCCESS,
-        payload: res.data
+        payload: res.data,
       })
     )
     .catch((err) => {
       dispatch({
-        type: AUTH_FAIL
+        type: AUTH_FAIL,
       });
     });
-
-}
+};
 
 //Register New User
-export const register = ({ name, email, password }) => (dispatch) => {
-  // Headers
-  const headers = {
-    headers: {
-      "Content-Type": "application/json"
-    }
-  };
+export const register =
+  ({ name, email, password }) =>
+  (dispatch) => {
+    // Headers
+    const headers = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
 
-  // Request body
-  const body = JSON.stringify({ name, email, password });
+    // Request body
+    const body = JSON.stringify({ name, email, password });
 
-  axios
-    .post("/api/users/register", body, headers)
-    .then((res) =>{
-      dispatch(returnStatus(res.data, res.status, 'REGISTER_SUCCESS'));
-      dispatch({ type: IS_LOADING })
-    })
-    .catch((err) => {
-      dispatch(returnStatus(err.response.data, err.response.status, 'REGISTER_FAIL'))
-      dispatch({
-        type: REGISTER_FAIL
+    axios
+      .post(`${process.env.REACT_APP_BACKEND_API}/api/users/register`, body, headers)
+      .then((res) => {
+        dispatch(returnStatus(res.data, res.status, "REGISTER_SUCCESS"));
+        dispatch({ type: IS_LOADING });
+      })
+      .catch((err) => {
+        dispatch(
+          returnStatus(err.response.data, err.response.status, "REGISTER_FAIL")
+        );
+        dispatch({
+          type: REGISTER_FAIL,
+        });
+        dispatch({ type: IS_LOADING });
       });
-      dispatch({ type: IS_LOADING })
-    });
-};
+  };
 
 //Login User
-export const login = ({ email, password }) => (dispatch) => {
-  // Headers
-  const headers = {
-    headers: {
-      "Content-Type": "application/json"
-    }
+export const login =
+  ({ email, password }) =>
+  (dispatch) => {
+    // Headers
+    const headers = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    // Request body
+    const body = JSON.stringify({ email, password });
+
+    axios
+      .post(`${process.env.REACT_APP_BACKEND_API}/api/users/login`, body, headers)
+      .then((res) => {
+        console.log(res);
+        localStorage.setItem("AccessToken", res?.data?.token);
+        dispatch({
+          type: LOGIN_SUCCESS,
+          payload: res.data,
+        });
+        dispatch({ type: IS_LOADING });
+      })
+      .catch((err) => {
+        dispatch(
+          returnStatus(err.response.data, err.response.status, "LOGIN_FAIL")
+        );
+        dispatch({
+          type: LOGIN_FAIL,
+        });
+        dispatch({ type: IS_LOADING });
+      });
   };
-
-  // Request body
-  const body = JSON.stringify({ email, password });
-
-  axios
-    .post("/api/users/login", body, headers)
-    .then((res) => {
-      console.log(res);
-      dispatch({
-        type: LOGIN_SUCCESS,
-        payload: res.data
-      });
-      dispatch({ type: IS_LOADING });
-    }
-    )
-    .catch((err) => {
-      dispatch(returnStatus(err.response.data, err.response.status, 'LOGIN_FAIL'))
-      dispatch({
-        type: LOGIN_FAIL
-      });
-      dispatch({ type: IS_LOADING })
-    });
-};
 
 //Logout User and Destroy session
 export const logout = () => (dispatch) => {
+  localStorage.removeItem("AccessToken");
+  dispatch({
+    type: LOGOUT_SUCCESS,
+  });
+};
+
+//Update User
+export const update =
+  ({ profile, id }) =>
+  (dispatch) => {
+    const AccessToken = localStorage.getItem("AccessToken");
+    // Headers
+    const headers = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `${AccessToken}`,
+      },
+    };
+
+    console.log("===========>", profile, "----------", id);
+
+    // Request body
+    const body = JSON.stringify({ profile });
 
     axios
-    .delete("/api/users/logout", { withCredentials: true })
-    .then((res) =>
-      dispatch({
-        type: LOGOUT_SUCCESS,
+      .post(`${process.env.REACT_APP_BACKEND_API}/api/users/update/${id}`, body, headers)
+      .then((res) => {
+        console.log(res);
+        dispatch({
+          type: UPDATE_SUCCESS,
+          payload: res.data,
+        });
+        dispatch({ type: IS_LOADING });
       })
-    )
-    .catch((err) => {
-      console.log(err);
-    });
-
-}
+      .catch((err) => {
+        dispatch(
+          returnStatus(err.response.data, err.response.status, "UPDATE_FAIL")
+        );
+        dispatch({
+          type: UPDATE_FAIL,
+        });
+        dispatch({ type: IS_LOADING });
+      });
+  };
