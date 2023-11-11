@@ -2,8 +2,9 @@ const express = require("express");
 const app = express();
 const { router } = require("./routes/users");
 const cors = require('cors');
+const serverless = require("serverless-http");
 
-const PORT = 8000 || process.env.PORT;
+// const PORT = 8000 || process.env.PORT;
 
 const corsOptions = {
   origin: '*',
@@ -17,4 +18,5 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use("/api/users", router);
 
-app.listen(PORT, () => console.log(`Server started on ${PORT}`));
+// app.listen(PORT, () => console.log(`Server started on ${PORT}`));
+module.exports.handler = serverless(app);
