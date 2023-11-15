@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { registerUser, loginUser, logoutUser, authChecker, updateUser, getUser } = require("../controllers/AuthController");
+const { registerUser, loginUser, logoutUser, authChecker, updateUser, getUser, uplaodProfile } = require("../controllers/AuthController");
 const authGuard = require("../middlewares/authguard");
 
 // Registers a new User
@@ -20,5 +20,7 @@ router.delete("/logout", logoutUser);
 router.get("/authchecker", authGuard, authChecker);
 
 router.post("/update/:id", authGuard, updateUser);
-router.get("/getUser/:id", authGuard, getUser)
+router.get("/getUser/:id", authGuard, getUser);
+
+router.post("/uploadProfile", uplaodProfile);
 module.exports = { router };

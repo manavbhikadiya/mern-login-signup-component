@@ -6,6 +6,8 @@ const UserService = require("../services/userService");
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
 const SECRETS = require("../common/secrets");
+const AWS = require("aws-sdk");
+const s3 = new AWS.S3({region: "us-east-1"});
 
 exports.isAuth = (req, res, next) => {
   const sessUser = req.session.user;
@@ -138,3 +140,25 @@ exports.getUser = async (req, res) => {
     console.error(error);
   }
 };
+
+exports.uplaodProfile = async (req,res) => {
+  try {
+    const buffer = Buffer.from(req.body.image.replace(/^data:image\/\w+;base64,/, ""),'base64')
+    const params = {
+      Bucket: "bhikadiyab00945545",
+      Key: req.body.imageName,
+      Body: buffer,
+      ContentEncoding: 'base64',
+      ContentType: "image/jpeg",
+    };
+
+    const response = await s3.upload(params).promise();
+    const profile = response.Location;
+    const responseMessage = {
+      url: profile,
+    }
+   res.status(200).send(responseMessage)
+  } catch (error) {
+    console.error(error)
+  }
+}

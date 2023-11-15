@@ -6,16 +6,8 @@ const serverless = require("serverless-http");
 
 // const PORT = 8000 || process.env.PORT;
 
-const corsOptions = {
-  origin: '*',
-  methods: ['OPTIONS', 'POST', 'GET'],
-  allowedHeaders: 'Content-Type',
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
-
-app.use(cors(corsOptions));
-app.use(express.json());
+app.use(cors());
+app.use(express.json({limit: '50mb'}));
 app.use("/api/users", router);
 
 // app.listen(PORT, () => console.log(`Server started on ${PORT}`));

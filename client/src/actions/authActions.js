@@ -23,14 +23,14 @@ import {
 //Check if user is already logged in
 export const isAuth = () => (dispatch) => {
   const AccessToken = localStorage.getItem("AccessToken");
-
+  const headers = {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `${AccessToken}`,
+    },
+  };
   axios
-    .get(`${process.env.REACT_APP_BACKEND_API}/api/users/authchecker`, {
-      withCredentials: true,
-      headers: {
-        Authorization: `${AccessToken}`,
-      },
-    })
+    .get(`${process.env.REACT_APP_BACKEND_API}/api/users/authchecker`, headers)
     .then((res) =>
       dispatch({
         type: AUTH_SUCCESS,

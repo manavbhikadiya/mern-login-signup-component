@@ -16,14 +16,7 @@ import "./style.css";
 import { Redirect } from "react-router-dom";
 import { logout, update } from "../actions/authActions";
 import { buttonReset, isLoading } from "../actions/uiActions";
-import AWS from "aws-sdk";
-
-AWS.config.update({
-  accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
-  secretAccessKey: process.env.REACT_APP_SECRET_ACCESS_KEY,
-  region: "us-east-1",
-  sessionToken: process.env.REACT_APP_SESSION_TOKEN,
-});
+import axios from 'axios';
 
 export class Profile extends Component {
   static propTypes = {
@@ -42,22 +35,39 @@ export class Profile extends Component {
   handleImpageInput = (e) => {
     e.preventDefault();
     const file = e.target.files[0];
-    this.setState({ file });
+    this.setState({file})
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      this.convertToBase64(reader.result);
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+      const fileType = file.type;
+      const fileName = file.name;
+      this.setState({fileType});
+      this.setState({fileName});
+    }
+  };
+
+  convertToBase64 = (image) => {
+    const imageBase64 = image.split(",")[1];
+    this.setState({imageBase64});
   };
 
   onSubmit = async (e) => {
     e.preventDefault();
-    const s3 = new AWS.S3();
     if (this.state.file) {
-      const params = {
-        Bucket: "bhikadiyab00945545",
-        Key: this.state.file.name,
-        Body: this.state.file,
+      const requestBody = {
+        image: `data:${this.state.fileType};base64,${this.state.imageBase64}`,
+        imageName: this.state.fileName,
       };
-      const response = await s3.upload(params).promise();
-      const profile = response.Location;
-      const id = this.props.authState.user.id;
-      if (profile) {
+
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_API}/api/users/uploadProfile`, requestBody);
+      if (response.data.url) {
+        const profile = response.data.url;
+        const id = this.props.authState.user.id;
         const user = { profile, id };
         this.props.isLoading();
         this.props.update(user);
